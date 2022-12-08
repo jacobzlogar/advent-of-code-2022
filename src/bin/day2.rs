@@ -1,4 +1,5 @@
-use aoc_2022::{Result, Game, Shape, Round, Strategy, get_input, Players};
+use aoc_2022::{Result, get_input};
+use aoc_2022::games::{Game, Shape, Round, Strategy, Players};
 
 pub fn main() -> Result<()> {
     let mut game = Game { player_score: 0 };
