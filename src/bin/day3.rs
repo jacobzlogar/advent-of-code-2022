@@ -12,6 +12,12 @@ pub struct Contents {
     pub third: String,
 }
 
+pub fn find_char(needle: char, haystack: String) -> Option<char> {
+    return haystack.chars().find_map(|chr: char| {
+        if chr == needle { Some(chr) } else { None }
+    });
+}
+
 impl Contents {
     pub fn create(items: Vec<String>) -> Result<Self> {
         let content = Self {
@@ -24,22 +30,9 @@ impl Contents {
 
     pub fn priority(self) -> usize {
         let priority = self.first.chars().into_iter().find_map(|c: char| {
-            let second_exists = self.second.chars().find_map(|chr| {
-                if chr == c {
-                    return Some(chr);
-                }
-                None
-            });
-            let third_exists = self.third.chars().find_map(|chr| {
-                if chr == c {
-                    return Some(chr);
-                }
-                None
-            });
-            if second_exists.is_some() && third_exists.is_some() {
-                return Some(c);
-            }
-            None
+            let second_exists = find_char(c, self.second.clone()).is_some();
+            let third_exists = find_char(c, self.third.clone()).is_some();
+            if second_exists && third_exists { Some(c) } else { None }
         }).unwrap();
         if priority.is_lowercase() {
             return priority as usize - 'a' as usize + 1;
