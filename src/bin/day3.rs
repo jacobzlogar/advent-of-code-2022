@@ -9,27 +9,42 @@ pub struct Backpack {
 pub struct Contents {
     pub first: String,
     pub second: String,
+    pub third: String,
 }
 
 impl Contents {
-    pub fn create(items: String) -> Self {
-        let (first, second) = items.split_at(items.len() / 2);
-        Self {
-            first: String::from(first),
-            second: String::from(second),
-        }
+    pub fn create(items: Vec<String>) -> Result<Self> {
+        let content = Self {
+            first: String::from(items.get(0).unwrap()),
+            second: String::from(items.get(1).unwrap()),
+            third: String::from(items.get(2).unwrap()),
+        };
+        Ok(content)
     }
 
     pub fn priority(self) -> usize {
-        let char = self.first.chars().into_iter().find_map(|c: char| {
-            self.second.chars().find(|char| {
-                char == &c
-            })
+        let priority = self.first.chars().into_iter().find_map(|c: char| {
+            let second_exists = self.second.chars().find_map(|chr| {
+                if chr == c {
+                    return Some(chr);
+                }
+                None
+            });
+            let third_exists = self.third.chars().find_map(|chr| {
+                if chr == c {
+                    return Some(chr);
+                }
+                None
+            });
+            if second_exists.is_some() && third_exists.is_some() {
+                return Some(c);
+            }
+            None
         }).unwrap();
-        if char.is_lowercase() {
-            return char as usize - 'a' as usize + 1;
+        if priority.is_lowercase() {
+            return priority as usize - 'a' as usize + 1;
         }
-        return char as usize - 'A' as usize + 27;
+        return priority as usize - 'A' as usize + 27;
     }
 }
 
@@ -38,9 +53,10 @@ pub fn main() -> Result<()> {
         .get_input()
         .expect("failed to get input")
         .to_vec()
-        .iter()
+        .chunks(3)
         .fold(Backpack { priority: 0}, |mut acc, items| {
-            let content = Contents::create(String::from(items));
+            let content = Contents::create(items.to_vec()).expect("failed to create contents");
+            dbg!(&content);
             acc.priority += content.priority();
             return acc;
         });
