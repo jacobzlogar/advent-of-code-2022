@@ -45,7 +45,7 @@ pub fn main() -> Result<()> {
     let backpack: Backpack = Helper::new(String::from("day3"))
         .get_input()
         .expect("failed to get input")
-        .to_vec()
+        .to_vec('\n')
         .chunks(3)
         .fold(Backpack { priority: 0}, |mut acc, items| {
             let content = Contents::create(items.to_vec()).expect("failed to create contents");

@@ -22,9 +22,9 @@ impl Helper {
         Ok(self)
     }
 
-    pub fn to_vec(self) -> Vec<String> {
+    pub fn to_vec(self, splitter: char) -> Vec<String> {
         let text = self.text.unwrap();
-        let result = text.split("\n").filter_map(|item| {
+        let result = text.split(splitter).filter_map(|item| {
             if item.is_empty() {
                 return None;
             }
