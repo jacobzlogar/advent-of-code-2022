@@ -1,4 +1,4 @@
-use super::{Result, get_input};
+use super::{Result};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Strategy {
