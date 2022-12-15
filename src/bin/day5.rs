@@ -56,7 +56,7 @@ fn main() -> Result<()> {
                     grid.cols.insert(column_index, vec![column]);
                 } else {
                     grid.cols.entry(column_index).and_modify(|entry| {
-                        entry.push(column);
+                        entry.insert(0, column);
                     });
                 }
             }
@@ -75,19 +75,30 @@ fn main() -> Result<()> {
 
         let (take, remainder) = &from_col.split_at(qty);
 
-        for t in remainder.iter().rev() {
+        for t in take.iter().rev() {
             to_col.push(Column {
                 column: to,
                 row: t.row,
                 value: t.value
             });
         }
-        grid.cols.insert(from, take.to_vec());
+        grid.cols.insert(from, remainder.to_vec());
         grid.cols.insert(to, to_col);
     }
+    let mut top = vec![];
     for col in grid.cols {
-        dbg!(col.1[col.1.len() - 1]);
+        top.insert(0, col.1[col.1.len() - 1]);
     }
+
+    top.sort_by(|a, b| {
+        return a.column.cmp(&b.column);
+    });
+    dbg!(&top);
+
+    let result = top.clone().into_iter().map(|col: Column| {
+        return col.value.to_string();
+    }).collect::<Vec<String>>().join("");
+    dbg!(result);
 
     Ok(())
 }
