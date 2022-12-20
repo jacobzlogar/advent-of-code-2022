@@ -1,8 +1,10 @@
+use std::collections::VecDeque;
 use std::fs;
 pub mod games;
 
 pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
+#[derive(Debug)]
 pub struct Helper {
     pub day: String,
     pub text: Option<String>,
@@ -33,4 +35,32 @@ impl Helper {
         return result;
     }
 }
+#[derive(Debug)]
+pub struct Crate {
+    items: Vec<String>
+}
 
+#[derive(Debug, Copy, Clone)]
+pub struct Column {
+    //pub row: usize,
+    pub column: usize,
+    pub value: char,
+}
+
+#[derive(Debug, Clone)]
+pub struct Row {
+    number: usize,
+    values: Vec<Column>,
+}
+
+#[derive(Debug)]
+pub struct Grid {
+    pub cols: Vec<VecDeque<Column>>
+}
+
+#[derive(Debug)]
+pub struct Move {
+    pub start: usize,
+    pub end: usize,
+    pub qty: usize,
+}

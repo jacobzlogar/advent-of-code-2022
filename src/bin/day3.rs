@@ -47,14 +47,13 @@ pub fn main() -> Result<()> {
         .expect("failed to get input")
         .to_vec('\n')
         .chunks(3)
-        .fold(Backpack { priority: 0}, |mut acc, items| {
-            let content = Contents::create(items.to_vec()).expect("failed to create contents");
-            dbg!(&content);
+        .fold(Backpack { priority: 0 }, |mut acc, items| {
+            let content = Contents::create(items.to_vec())
+                .expect("failed to create contents");
             acc.priority += content.priority();
             return acc;
         });
 
     dbg!(backpack);
-    //dbg!(contents);
     Ok(())
 }

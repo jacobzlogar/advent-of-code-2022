@@ -1,104 +1,90 @@
-use std::collections::HashMap;
-use aoc_2022::{Result, Helper};
+use std::collections::VecDeque;
+use aoc_2022::{Helper, Grid, Column, Move};
 
-#[derive(Debug)]
-struct Crate {
-    items: Vec<String>
+pub fn parse_move(index: usize, moves: Vec<String>) -> usize {
+    moves[index].parse::<usize>().unwrap()
 }
 
-#[derive(Debug, Copy, Clone)]
-struct Column {
-    row: usize,
-    column: usize,
-    value: char,
-}
+pub fn parse_moves(data: Vec<String>) -> Vec<Move> {
+    data[9..data.len()]
+        .into_iter()
+        .map(|mov| {
+            let text = mov
+                .split_whitespace()
+                .map(|i| i.to_string())
+                .collect::<Vec<String>>();
 
-#[derive(Debug, Clone)]
-struct Row {
-    number: usize,
-    values: Vec<Column>,
+            return Move {
+                qty: parse_move(1,  text.clone()),
+                start: parse_move(3, text.clone()),
+                end: parse_move(5, text.clone()),
+            }
+        })
+        .collect()
 }
-
-#[derive(Debug)]
-struct Grid {
-    cols: HashMap<usize, Vec<Column>>
-}
-
-#[derive(Debug)]
-struct Move {
-    start: usize,
-    end: usize,
-    crates: Vec<Crate>
-}
-
-fn main() -> Result<()> {
+pub fn create_grid() -> (Vec<String>, Grid) {
     let data: Vec<String> = Helper::new(String::from("day5"))
         .get_input()
         .expect("failed to get input")
         .to_vec('\n');
 
-    let start = &data[0..8];
     let mut grid = Grid {
-        cols: HashMap::new(),
+        cols: vec![VecDeque::new(); 9]
     };
-    for (row_number, value) in start.iter().enumerate() {
-        let characters: Vec<char> = value.chars().collect();
-
-        for (idx, val) in characters[1..].iter().step_by(4).enumerate() {
-            let column_index = idx + 1;
-            if val.is_ascii_alphanumeric() {
-                let column = Column {
-                    row: row_number,
-                    column: column_index,
-                    value: val.to_owned(),
-                };
-                if ! grid.cols.contains_key(&column_index) {
-                    grid.cols.insert(column_index, vec![column]);
-                } else {
-                    grid.cols.entry(column_index).and_modify(|entry| {
-                        entry.insert(0, column);
-                    });
+    // first 8 lines represent the initial crate setup
+    for (_row_number, row_val) in data[0..8]
+        .into_iter()
+        .enumerate() {
+            let cols: Vec<Column> = row_val.chars()
+                .into_iter()
+                .skip(1)
+                .step_by(4)
+                .enumerate()
+                .map(|(idx, val)| {
+                    Column {
+                        column: idx,
+                        value: val,
+                    }
+                }).collect();
+            cols.into_iter().rev().for_each(|c| {
+                if ! c.value.to_string().trim().is_empty() {
+                    grid.cols[c.column].push_front(c);
                 }
+        });
+    }
+    return (data, grid);
+}
+
+fn main() {
+    let (data, mut grid) = create_grid();
+    let moves = parse_moves(data);
+    for mov in moves {
+        let mut grid_cols = grid.cols.clone();
+        let start_row = &mut grid_cols[mov.start - 1];
+        let insert = start_row.iter().rev().take(mov.qty).collect::<VecDeque<&Column>>();
+        if insert.len().eq(&1) {
+            let col = Column {
+                column: mov.end - 1,
+                value: insert[0].value
+            };
+            grid.cols[mov.end - 1].push_back(col);
+            grid.cols[mov.start - 1].pop_back();
+        } else {
+            for take in insert.into_iter().rev() {
+                let col = Column {
+                    column: mov.end - 1,
+                    value: take.value
+                };
+                grid.cols[mov.end - 1].push_back(col);
+                grid.cols[mov.start - 1].pop_back();
             }
         }
     }
 
-    let moves = &data[9..data.len()];
-    for m in moves.iter() {
-        let v = m.split_whitespace().collect::<Vec<&str>>();
-        let qty = v[1].parse::<usize>().unwrap();
-        let from = v[3].parse::<usize>().unwrap();
-        let to = v[5].parse::<usize>().unwrap();
-
-        let from_col: Vec<Column> = grid.cols.get(&from).unwrap().to_vec();
-        let mut to_col: Vec<Column> = grid.cols.get(&to).unwrap().to_vec();
-
-        let (take, remainder) = &from_col.split_at(qty);
-
-        for t in take.iter().rev() {
-            to_col.push(Column {
-                column: to,
-                row: t.row,
-                value: t.value
-            });
-        }
-        grid.cols.insert(from, remainder.to_vec());
-        grid.cols.insert(to, to_col);
-    }
-    let mut top = vec![];
+    let mut result = String::new();
     for col in grid.cols {
-        top.insert(0, col.1[col.1.len() - 1]);
+        dbg!(&col);
+        result.push(col[col.len() - 1].value);
     }
-
-    top.sort_by(|a, b| {
-        return a.column.cmp(&b.column);
-    });
-    dbg!(&top);
-
-    let result = top.clone().into_iter().map(|col: Column| {
-        return col.value.to_string();
-    }).collect::<Vec<String>>().join("");
     dbg!(result);
-
-    Ok(())
 }
