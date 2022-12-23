@@ -21,3 +21,8 @@ dir gzzz
 dir nbdzs
 dir vvmcfptr
 dir wjvzwssp
+$ cd bjlcfcfq
+$ ls
+dir fvspj
+dir pwcvj
+dir tvhrzql
